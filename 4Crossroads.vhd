@@ -72,7 +72,7 @@ architecture behaviour of 4Crossroads is
 		);
 	end component;
 
-	signal clock				: std_logic;
+	signal clock			: std_logic;
 	
 begin
 
