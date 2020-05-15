@@ -1,13 +1,13 @@
 -- Automatic 4 Way Crossroads Traffic Light with Pelican
 -- Perancangan Sistem Digital Praktikum
 -- Kelompok 	: B3
--- Anggota		: - Arief Saferman
---				: - Farhan Almasyhur
---				: - Muhammad Alfi Aldolio
---				: - Ramadhan Kalih Sewu
+-- Anggota	: - Arief Saferman
+--		: - Farhan Almasyhur
+--		: - Muhammad Alfi Aldolio
+--		: - Ramadhan Kalih Sewu
 -- Almamater	: Universitas Indonesia
--- Language		: VHDL
--- License		: GNU GPL-3.0
+-- Language	: VHDL
+-- License	: GNU GPL-3.0
 -- Document.	: https://github.com/ramdanks/4Crossroads
 
 -- ( Integer Package ) --
@@ -26,7 +26,7 @@ use ieee.std_logic_1164.all;
 use work.IntegerPackage.all;
 
 entity eTraffic is
-	generic (ResetCounter 	: integer 	:= 30);
+	generic (ResetCounter 		: integer 	:= 30);
 	port
 	(
 		pButton			: in 	std_logic;
@@ -65,20 +65,20 @@ architecture behaviour of e4Crossroads is
 
 	type sLight			is (JALAN, BERSIAP, BERHENTI);
 	type sLane			is array (3 downto 0) of sLight;
-	type sTraffic 		is (VEHICLE, PEDESTRIAN);
+	type sTraffic 			is (VEHICLE, PEDESTRIAN);
 	
-	signal LaneState	: sLane		:= (JALAN, others => BERHENTI);
+	signal LaneState		: sLane		:= (JALAN, others => BERHENTI);
 	signal TrafficState : sTraffic 	:= VEHICLE;
 	
 	component eTraffic
 		generic (ResetCounter 	: integer 	:= 30);
 		port
 		(
-			pButton			: in 	std_logic;
-			pCounter		: inout integer;
-			pGreen			: out 	std_logic;
-			pYellow			: inout std_logic;
-			pRed			: out 	std_logic
+			pButton		: in 	std_logic;
+			pCounter	: inout integer;
+			pGreen		: out 	std_logic;
+			pYellow		: inout std_logic;
+			pRed		: out 	std_logic
 		);
 	end component;
 
@@ -90,12 +90,12 @@ LaneGenerate:
 for i in 1 to TrafficSize generate
 	Lane:
 	eTraffic port map 	(
-							pButton(i),
-							pCounter(i),
-							pGreen(i),
-							pYellow(i),
-							pRed(i)
-						);
+					pButton(i),
+					pCounter(i),
+					pGreen(i),
+					pYellow(i),
+					pRed(i)
+				);
 end generate;
 
 Light :	process( TrafficState, LaneState ) is begin
@@ -106,20 +106,20 @@ Light :	process( TrafficState, LaneState ) is begin
 		
 			case LaneState(i) is
 			
-				when JALAN 		=>		
-									pGreen(i) 	<= '1';
-									pYellow(i) 	<= '0';
-									pRed(i)		<= '0';
+				when JALAN 	=>		
+							pGreen(i) 	<= '1';
+							pYellow(i) 	<= '0';
+							pRed(i)		<= '0';
 							
 				when BERSIAP 	=>
-									pGreen(i) 	<= '0';
-									pYellow(i) 	<= '1';
-									pRed(i)		<= '0';
+							pGreen(i) 	<= '0';
+							pYellow(i) 	<= '1';
+							pRed(i)		<= '0';
 									
 				when BERHENTI 	=>
-									pGreen(i) 	<= '0';
-									pYellow(i) 	<= '0';
-									pRed(i)		<= '1';
+							pGreen(i) 	<= '0';
+							pYellow(i) 	<= '0';
+							pRed(i)		<= '1';
 			end case;
 		
 		end loop;
@@ -137,7 +137,6 @@ Light :	process( TrafficState, LaneState ) is begin
 	end if;
 
 end process;
-
 
 
 end architecture;
