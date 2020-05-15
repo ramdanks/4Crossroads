@@ -176,23 +176,23 @@ Light :	process( TrafficState, LaneState ) is begin
 				case LaneState(i) is
 				
 					when JALAN 	=>		
-								pGreen(i) 			<= '1';
-								pYellow(i) 			<= '0';
-								pRed(i)				<= '0';
+								pGreen(i) 		<= '1';
+								pYellow(i) 		<= '0';
+								pRed(i)			<= '0';
 								pPelicanGreen(i) 	<= '0';
 								pPelicanRed(i) 		<= '1';
 								
 					when BERSIAP 	=>
-								pGreen(i) 			<= pGreen(i);
-								pYellow(i) 			<= '1';
-								pRed(i)				<= pRed(i);
+								pGreen(i) 		<= pGreen(i);
+								pYellow(i) 		<= '1';
+								pRed(i)			<= pRed(i);
 								pPelicanGreen(i) 	<= '0';
 								pPelicanRed(i) 		<= '1';
 										
 					when BERHENTI 	=>
-								pGreen(i) 			<= '0';
-								pYellow(i) 			<= '0';
-								pRed(i)				<= '1';
+								pGreen(i) 		<= '0';
+								pYellow(i) 		<= '0';
+								pRed(i)			<= '1';
 								pPelicanGreen(i) 	<= '0';
 								pPelicanRed(i) 		<= '1';
 				end case;
@@ -211,9 +211,9 @@ Light :	process( TrafficState, LaneState ) is begin
 	
 		for i in 1 to TrafficSize loop
 		
-			pGreen(i) 			<= '0';
-			pYellow(i)			<= '0';
-			pRed(i) 			<= '1';
+			pGreen(i) 		<= '0';
+			pYellow(i)		<= '0';
+			pRed(i) 		<= '1';
 			pPelicanGreen(i) 	<= '1';
 			pPelicanRed(i) 		<= '0';
 		
