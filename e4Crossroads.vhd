@@ -54,6 +54,7 @@ architecture behaviour of e4Crossroads is
 	signal TrafficState : sTraffic 	:= VEHICLE;
 	signal clock			: std_logic;
 	
+	-- Process Counter at RealTime
 	function RealTime( pTime : integer ) 
 	return integer is begin
 	
@@ -61,7 +62,19 @@ architecture behaviour of e4Crossroads is
 		
     	end function;
 	
+	-- Generate 1 Sec Clock
+	component timer_1sec is
+		Port
+		(
+			reset, clk 	: in std_logic := '0';
+		 	start		: in std_logic := '0';
+		  	timer   	: out std_logic
+		);  
+	end component;
+
 begin
+
+Timer: timer_1sec PORT MAP (timer => clock);
 
 Control	: process( clock, TrafficState, LaneState, pCounter ) is begin
 
