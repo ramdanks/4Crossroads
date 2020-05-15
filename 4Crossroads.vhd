@@ -53,7 +53,7 @@ entity e4Crossroads is
 	port
 	(
 		pButton			: in 	std_logic_vector	(1 to TrafficSize);
-		pCounter		: inout int					(1 to TrafficSize);
+		pCounter		: inout int			(1 to TrafficSize);
 		pGreen			: out 	std_logic_vector	(1 to TrafficSize);
 		pYellow			: inout std_logic_vector	(1 to TrafficSize);
 		pRed			: out 	std_logic_vector	(1 to TrafficSize)
