@@ -46,6 +46,13 @@ end e4Crossroads;
 
 architecture behaviour of e4Crossroads is
 
+component timer_1sec is
+	Port (reset, clk : in std_logic := '0';
+		  start		 : in std_logic := '0';
+		  timer   	 : out std_logic);
+		  
+end component;
+
 	type sLight			is (JALAN, BERSIAP, BERHENTI);
 	type sLane			is array (1 to TrafficSize) of sLight;
 	type sTraffic 			is (VEHICLE, PEDESTRIAN);
@@ -65,6 +72,8 @@ architecture behaviour of e4Crossroads is
     end function;
 	
 begin
+
+timer_clock: timer_1sec PORT MAP (timer => clock);
 
 -- Initialization Process (Set Initial Value)
 Init : process( initialization ) is begin
