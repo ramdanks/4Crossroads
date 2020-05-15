@@ -1,13 +1,13 @@
 -- Automatic 4 Way Crossroads Traffic Light with Pelican
 -- Perancangan Sistem Digital Praktikum
 -- Kelompok 	: B3
--- Anggota		: - Arief Saferman
---				: - Farhan Almasyhur
---				: - Muhammad Alfi Aldolio
---				: - Ramadhan Kalih Sewu
+-- Anggota	: - Arief Saferman
+--		: - Farhan Almasyhur
+--		: - Muhammad Alfi Aldolio
+--		: - Ramadhan Kalih Sewu
 -- Almamater	: Universitas Indonesia
--- Language		: VHDL
--- License		: GNU GPL-3.0
+-- Language	: VHDL
+-- License	: GNU GPL-3.0
 -- Document.	: https://github.com/ramdanks/4Crossroads
 
 
@@ -55,36 +55,36 @@ architecture behaviour of 4Crossroads is
 
 	type sLight			is (JALAN, BERSIAP, BERHENTI);
 	type sLane			is array (3 downto 0) of sLight;
-	type sTraffic 		is (VEHICLE, PEDESTRIAN);
+	type sTraffic 			is (VEHICLE, PEDESTRIAN);
 	
-	signal LaneState	: sLane		:= (JALAN, others => BERHENTI);
-	signal TrafficState : sTraffic 	:= VEHICLE;
+	signal LaneState		: sLane		:= (JALAN, others => BERHENTI);
+	signal TrafficState		: sTraffic 	:= VEHICLE;
 	
 	component eTraffic
 		generic (ResetCounter 	: integer 	:= 30);
 		port
 		(
-			pButton			: in 	std_logic;
-			pCounter		: inout integer;
-			pGreen			: out 	std_logic;
-			pYellow			: inout std_logic;
-			pRed			: out 	std_logic
+			pButton		: in 	std_logic;
+			pCounter	: inout integer;
+			pGreen		: out 	std_logic;
+			pYellow		: inout std_logic;
+			pRed		: out 	std_logic
 		);
 	end component;
 
-	signal clock		: std_logic;
+	signal clock				: std_logic;
 	
 begin
 
 for i in 1 to TrafficSize generate
 
-	eTraffic port map 	(
-							pButton(i),
-							pCounter(i),
-							pGreen(i),
-							pYellow(i),
-							pRed(i)
-						);
+	eTraffic port map(
+				pButton(i),
+				pCounter(i),
+				pGreen(i),
+				pYellow(i),
+				pRed(i)
+			 );
 
 end generate;
 
