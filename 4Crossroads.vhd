@@ -29,11 +29,11 @@ entity eTraffic is
 	generic (ResetCounter 		: integer 	:= 30);
 	port
 	(
-		pButton			: in 	std_logic;
-		pCounter		: inout int(1 downto 1);
-		pGreen			: out 	std_logic;
-		pYellow			: inout std_logic;
-		pRed			: out 	std_logic
+		pButton			: in 		std_logic;
+		pCounter		: inout 	int(1 downto 1);
+		pGreen			: out 		std_logic;
+		pYellow			: inout 	std_logic;
+		pRed			: out 		std_logic
 	);
 end eTraffic;
 
@@ -49,14 +49,14 @@ use ieee.numeric_std.all;
 use work.IntegerPackage.all;
 
 entity e4Crossroads is
-	generic (TrafficSize : natural := 4);
+	generic (TrafficSize 		: natural 	:= 4);
 	port
 	(
-		pButton			: in 	std_logic_vector	(1 to TrafficSize);
-		pCounter		: inout int			(1 to TrafficSize);
-		pGreen			: out 	std_logic_vector	(1 to TrafficSize);
-		pYellow			: inout std_logic_vector	(1 to TrafficSize);
-		pRed			: out 	std_logic_vector	(1 to TrafficSize)
+		pButton			: in 		std_logic_vector	(1 to TrafficSize);
+		pCounter		: inout 	int			(1 to TrafficSize);
+		pGreen			: out 		std_logic_vector	(1 to TrafficSize);
+		pYellow			: inout 	std_logic_vector	(1 to TrafficSize);
+		pRed			: out 		std_logic_vector	(1 to TrafficSize)
 	);
 
 end e4Crossroads;
@@ -69,7 +69,8 @@ architecture behaviour of e4Crossroads is
 	
 	signal LaneState		: sLane		:= (JALAN, others => BERHENTI);
 	signal TrafficState : sTraffic 	:= VEHICLE;
-	
+	signal clock			: std_logic;
+		       
 	component eTraffic
 		generic (ResetCounter 	: integer 	:= 30);
 		port
@@ -81,8 +82,6 @@ architecture behaviour of e4Crossroads is
 			pRed		: out 	std_logic
 		);
 	end component;
-
-	signal clock		: std_logic;
 	
 begin
 
