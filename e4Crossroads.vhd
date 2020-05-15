@@ -28,7 +28,7 @@ use ieee.numeric_std.all;
 use work.IntegerPackage.all;
 
 entity e4Crossroads is
-	generic 
+	generic
 	(
 		TrafficSize 		: natural 	:= 4;
 		ResetCounter		: integer	:= 30;
@@ -40,7 +40,9 @@ entity e4Crossroads is
 		pButton			: in 		std_logic_vector	(1 to TrafficSize) := ('0', '0', '0', '0');
 		pGreen			: inout 	std_logic_vector	(1 to TrafficSize) := ('1', '0', '0', '0');
 		pYellow			: inout 	std_logic_vector	(1 to TrafficSize) := ('0', '0', '0', '0');
-		pRed			: inout 	std_logic_vector	(1 to TrafficSize) := ('0', '1', '1', '1')
+		pRed			: inout 	std_logic_vector	(1 to TrafficSize) := ('0', '1', '1', '1');
+    		RedP      		: inout std_logic_vector (1 to TrafficSize) := ('1','1','1','1');
+    		GreenP    		: inout std_logic_vector (1 to TrafficSize) := ('0','0','0','0')
 	);
 end e4Crossroads;
 
@@ -49,19 +51,22 @@ architecture behaviour of e4Crossroads is
 	type sLight			is (JALAN, BERSIAP, BERHENTI);
 	type sLane			is array (1 to TrafficSize) of sLight;
 	type sTraffic 			is (VEHICLE, PEDESTRIAN);
-	
+  type sPelicanLight is (SHIBUYA, DIAM);
+  type pLane is array (1 to TrafficSize) of sPelicanLight;
+
 	signal LaneState		: sLane		:= (JALAN, others => BERHENTI);
+  signal PelicanState : pLane := (DIAM, others => DIAM);
 	signal TrafficState : sTraffic 	:= VEHICLE;
 	signal clock			: std_logic;
-	
+
 	-- Process Counter at RealTime
-	function RealTime( pTime : integer ) 
+	function RealTime( pTime : integer )
 	return integer is begin
-	
+
         	return pTime + 1;
-		
+
     	end function;
-	
+
 	-- Generate 1 Sec Clock
 	component timer_1sec is
 		Port
@@ -69,36 +74,42 @@ architecture behaviour of e4Crossroads is
 			reset, clk 	: in std_logic := '0';
 		 	start		: in std_logic := '0';
 		  	timer   	: out std_logic
-		);  
+		);
 	end component;
 
 begin
 
 Timer: timer_1sec PORT MAP (timer => clock);
 
-Control	: process( clock, TrafficState, LaneState, pCounter ) is begin
+Control	: process( clock, TrafficState, LaneState, pCounter, pButton ) is begin
 
 	if rising_edge( clock ) then
-	
+
 		for i in 1 to TrafficSize loop
-		
+
 			if ( pCounter(i) = RealTime(0) ) then
-			
+
 				case pGreen(i) is
-			
+
 					when '1' 	=> LaneState(i) <= BERHENTI;
 					when others 	=> LaneState(i) <= JALAN;
-				
+
 				end case;
-			
+
 			elsif ( pCounter(i) <= RealTime(3) ) then
-			
+
 				LaneState(i) <= BERSIAP;
-			
+
+      elsif ( pButton = "1111" ) then
+
+        Lanestate(i) <= BERHENTI;
+			  TrafficState <= PEDESTRIAN;
+        PelicanState(i) <= SHIBUYA;
+
 			end if;
-		
+
 		end loop;
-	
+
 	end if;
 
 end process;
@@ -106,39 +117,53 @@ end process;
 Light :	process( TrafficState, LaneState ) is begin
 
 	if ( TrafficState = VEHICLE ) then
-		
+
 		for i in 1 to TrafficSize loop
-		
+
 			case LaneState(i) is
-			
-				when JALAN 	=>		
+
+				when JALAN 	=>
 							pGreen(i) 	<= '1';
 							pYellow(i) 	<= '0';
 							pRed(i)		<= '0';
-							
+
 				when BERSIAP 	=>
 							pGreen(i) 	<= pGreen(i);
 							pYellow(i) 	<= '1';
 							pRed(i)		<= pRed(i);
-									
+
 				when BERHENTI 	=>
 							pGreen(i) 	<= '0';
 							pYellow(i) 	<= '0';
 							pRed(i)		<= '1';
 			end case;
-		
+
 		end loop;
-	
+
 	elsif ( TrafficState = PEDESTRIAN ) then
-	
-		for i in 1 to TrafficSize loop
-		
+
+  		for i in 1 to TrafficSize loop
+
+        case PelicanState(i) is
+
+          when DIAM =>
+      			pGreen(i) 	<= '1';
+      			pYellow(i)	<= '0';
+      			pRed(i) 	<= '0';
+           		RedP(i)		<= '1';
+            		GreenP(i) 	<= '0';
+
+          when SHIBUYA =>
 			pGreen(i) 	<= '0';
-			pYellow(i)	<= '0';
-			pRed(i) 	<= '1';
-		
-		end loop;
-	
+      			pYellow(i)	<= '0';
+      			pRed(i) 	<= '1';
+            		RedP(i) 	<= '0';
+           		GreenP(i) 	<= '1';
+
+        end case;
+
+  		end loop;
+
 	end if;
 
 end process;
@@ -146,25 +171,25 @@ end process;
 Counting : process( clock, pGreen ) is begin
 
 	if rising_edge( clock ) then
-	
+
 		for i in 1 to TrafficSize loop
-		
+
 			if ( pCounter(i) > RealTime(0) ) then
-			
+
 				pCounter(i) <= pCounter(i) - 1;
-				
+
 			elsif ( pCounter(i) <= RealTime(0) and pGreen(i) = '1' ) then
-			
+
 				pCounter(i) <= ResetCounter;
-				
+
 			elsif ( pCounter(i) <= RealTime(0) and pGreen(i) = '0' ) then
-			
+
 				pCounter(i) <= GreenCounter;
-			
+
 			end if;
-		
+
 		end loop;
-	
+
 	end if;
 
 end process;
