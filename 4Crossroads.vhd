@@ -19,25 +19,6 @@ package IntegerPackage is
     type int is array (natural range <>) of integer;
 end;
 
--- ( Entity of Traffic Light ) --
-
-library ieee;
-use ieee.std_logic_1164.all;
-
-entity eTraffic is
-	port
-	(
-		pButton			: in 		std_logic;
-		pCounter		: inout 	integer;
-		pGreen			: inout 	std_logic;
-		pYellow			: inout 	std_logic;
-		pRed			: out 		std_logic
-	);
-end eTraffic;
-
-architecture declaration of eTraffic is begin
-end architecture;
-
 -- ( 4 Crossroads Implementation ) --
 
 library ieee;
@@ -59,31 +40,21 @@ entity e4Crossroads is
 		pCounter		: inout 	int					(1 to TrafficSize);
 		pGreen			: inout 	std_logic_vector	(1 to TrafficSize);
 		pYellow			: inout 	std_logic_vector	(1 to TrafficSize);
-		pRed			: out 		std_logic_vector	(1 to TrafficSize)
+		pRed			: inout 	std_logic_vector	(1 to TrafficSize)
 	);
-
 end e4Crossroads;
 
 architecture behaviour of e4Crossroads is
 
 	type sLight			is (JALAN, BERSIAP, BERHENTI);
-	type sLane			is array (3 downto 0) of sLight;
+	type sLane			is array (1 to TrafficSize) of sLight;
 	type sTraffic 			is (VEHICLE, PEDESTRIAN);
 	
 	signal LaneState		: sLane		:= (JALAN, others => BERHENTI);
 	signal TrafficState : sTraffic 	:= VEHICLE;
 	signal clock			: std_logic;
+	signal initialization 		: boolean := true;
 		       
-	component eTraffic
-		port
-		(
-			pButton		: in 	std_logic;
-			pCounter	: inout integer;
-			pGreen		: inout std_logic;
-			pYellow		: inout std_logic;
-			pRed		: out 	std_logic
-		);
-	end component;
 	
 	function ResetWaitingTime	( p_WaitingTime :	integer;
 					  p_GreenTime	:	integer ) 
@@ -95,17 +66,36 @@ architecture behaviour of e4Crossroads is
 	
 begin
 
-LaneGenerate:
-for i in 1 to TrafficSize generate
-	Lane:
-	eTraffic port map 	(
-					pButton(i),
-					pCounter(i),
-					pGreen(i),
-					pYellow(i),
-					pRed(i)
-				);
-end generate;
+-- Initialization Process (Set Initial Value)
+Init : process( initialization ) is begin
+
+	if ( initialization ) then
+
+		pGreen(1) <= '1';
+		pGreen(2) <= '0';
+		pGreen(3) <= '0';
+		pGreen(4) <= '0';
+
+		pYellow(1) <= '0';
+		pYellow(2) <= '0';
+		pYellow(3) <= '0';
+		pYellow(4) <= '0';
+
+		pRed(1) <= '0';
+		pRed(2) <= '1';
+		pRed(3) <= '1';
+		pRed(4) <= '1';
+
+		pCounter(1) <= GreenCounter;
+		pCounter(2) <= WaitingCounter;
+		pCounter(3) <= WaitingCounter * 2;
+		pCounter(3) <= WaitingCounter * 3;
+
+		initialization <= false;
+
+	end if;
+	
+end process;
 
 Control	: process( clock, TrafficState, LaneState, pCounter ) is begin
 
@@ -120,6 +110,12 @@ Control	: process( clock, TrafficState, LaneState, pCounter ) is begin
 			elsif ( pCounter(i) = 0 and pGreen(i) = '0' ) then
 			
 				LaneState(i) <= JALAN;
+			
+			end if;
+			
+			if ( pCounter(i) < 4 ) then
+			
+				LaneState(i) <= BERSIAP;
 			
 			end if;
 		
@@ -143,9 +139,9 @@ Light :	process( TrafficState, LaneState ) is begin
 							pRed(i)		<= '0';
 							
 				when BERSIAP 	=>
-							pGreen(i) 	<= '0';
+							pGreen(i) 	<= pGreen(i);
 							pYellow(i) 	<= '1';
-							pRed(i)		<= '0';
+							pRed(i)		<= pRed(i);
 									
 				when BERHENTI 	=>
 							pGreen(i) 	<= '0';
