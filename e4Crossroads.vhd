@@ -67,11 +67,12 @@ architecture behaviour of e4Crossroads is
 	type sLane			is array (1 to TrafficSize) of sLight;
 	type sTraffic 			is (VEHICLE, PWAIT, PEDESTRIAN);
 	
-	signal LaneState		: sLane		:= (JALAN, others => BERHENTI);
-	signal TrafficState 		: sTraffic 	:= VEHICLE;
-	signal clock			: std_logic	:= '0';
+	signal LaneState		: sLane				:= (JALAN, others => BERHENTI);
+	signal TrafficState 		: sTraffic 			:= VEHICLE;
+	signal clock			: std_logic			:= '0';
 	signal ParsingDigit		: int2(1 to 4);
-	signal PendingPedestrian	: boolean 	:= false;
+	signal PendingPedestrian	: boolean 			:= false;
+	signal BufferPelicanButton	: std_logic_vector(1 to 4)	:= "0000";
 	
 	-- Process Counter at RealTime
 	function RealTime( pTime : integer ) 
@@ -82,11 +83,10 @@ architecture behaviour of e4Crossroads is
     	end function;
 	
 	-- Processing Pelican Button
-	function AllPelicanPressed( param : std_logic_vector(1 to TrafficSize) )
+	function AllPelicanPressed( PortButton : std_logic_vector(1 to TrafficSize) )
 	return boolean is begin
 
-		if ( param = "1111" ) then 	return true;
-		end if;
+		if PortButton = "1111" then return true; end if;
 		return false;
 
 	end function;
@@ -111,6 +111,7 @@ Control	: process( clock, TrafficState, LaneState, pCounter, pPelicanButton ) is
 	
 		for i in 1 to TrafficSize loop
 			
+			-- Ganti Giliran
 			if ( TrafficState = PEDESTRIAN and pCounter(i) = RealTime(0) ) then
 			
 				TrafficState <= VEHICLE;
@@ -139,7 +140,7 @@ Control	: process( clock, TrafficState, LaneState, pCounter, pPelicanButton ) is
 					LaneState(i) <= BERHENTI;
 
 				-- Hanya transisi ke JALAN apabila Tidak Pending Pedestrian
-				elsif ( pGreen(i) = '0' and (not PendingPedestrian) ) then
+				elsif ( pGreen(i) = '0' ) then
 					
 					LaneState(i) <= JALAN;	
 			
@@ -149,15 +150,24 @@ Control	: process( clock, TrafficState, LaneState, pCounter, pPelicanButton ) is
 		
 		end loop;
 
-		if ( AllPelicanPressed( pPelicanButton ) ) then
-		
-			PendingPedestrian 	<= true;
+		-- Simpan Riwayat Pelican Button (Agar Button Tidak Harus dipencet bersamaan)
+		for i in 1 to TrafficSize loop
 
-		elsif ( PendingPedestrian ) then
+			if pPelicanButton(i) = '1' then	BufferPelicanButton(i) <= '1';	end if;
+		
+		end loop;
+
+		-- Cek Kondisi Pedestrian
+		if ( PendingPedestrian ) then
 
 			TrafficState 		<= PWAIT;
-			pPelicanButton		<= "0000";
+			BufferPelicanButton	<= "0000";
 			PendingPedestrian 	<= false;
+		
+		-- Pending Pedestrian hanya di Trigger kalo Lagi Kondisi VEHICLE. Jadi tidak bisa terus menerus
+		elsif ( AllPelicanPressed( BufferPelicanButton ) and TrafficState = VEHICLE ) then
+		
+			PendingPedestrian 	<= true;
 
 		end if;
 	
@@ -171,39 +181,29 @@ Light :	process( TrafficState, LaneState ) is begin
 		
 		for i in 1 to TrafficSize loop
 		
-			if ( not PendingPedestrian ) then
-
-				case LaneState(i) is
+			case LaneState(i) is
 				
-					when JALAN 	=>		
-								pGreen(i) 		<= '1';
-								pYellow(i) 		<= '0';
-								pRed(i)			<= '0';
-								pPelicanGreen(i) 	<= '0';
-								pPelicanRed(i) 		<= '1';
+				when JALAN 	=>		
+							pGreen(i) 		<= '1';
+							pYellow(i) 		<= '0';
+							pRed(i)			<= '0';
+							pPelicanGreen(i) 	<= '0';
+							pPelicanRed(i) 		<= '1';
 								
-					when BERSIAP 	=>
-								pGreen(i) 		<= pGreen(i);
-								pYellow(i) 		<= '1';
-								pRed(i)			<= pRed(i);
-								pPelicanGreen(i) 	<= '0';
-								pPelicanRed(i) 		<= '1';
+				when BERSIAP 	=>
+							pGreen(i) 		<= pGreen(i);
+							pYellow(i) 		<= '1';
+							pRed(i)			<= pRed(i);
+							pPelicanGreen(i) 	<= '0';
+							pPelicanRed(i) 		<= '1';
 										
-					when BERHENTI 	=>
-								pGreen(i) 		<= '0';
-								pYellow(i) 		<= '0';
-								pRed(i)			<= '1';
-								pPelicanGreen(i) 	<= '0';
-								pPelicanRed(i) 		<= '1';
-				end case;
-				
-			else
-			
-				pGreen(i) 	<= '0';
-				pYellow(i) 	<= '0';
-				pRed(i)		<= '1';
-				
-			end if;
+				when BERHENTI 	=>
+							pGreen(i) 		<= '0';
+							pYellow(i) 		<= '0';
+							pRed(i)			<= '1';
+							pPelicanGreen(i) 	<= '0';
+							pPelicanRed(i) 		<= '1';
+			end case;
 		
 		end loop;
 	
